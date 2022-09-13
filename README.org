@@ -1,0 +1,9 @@
+EGLOT-TEMPEL
+
+Simple shim adapter to use the tempel templating library with eglot, instead of yasnippet.
+
+This will take the LSP template provided by the server and convert it into a format tempel can take advantage of.
+
+Understandably, this package conflicts with yasnippet and due to the dynamic nature of elisp, needs to load after eglot.
+
+

@@ -20,7 +20,7 @@
 
 ;;; Code:
 (defun tempel-eglot--convert (snippet)
-  "Take a SNIPPET provided by the LSP servier via eglot and return a sexp useful for tempel.el."
+  "Take a SNIPPET provided by the LSP server and return a sexp useful for tempel.el."
   (if (string-match "${\\([1-9]\\):\\([^}]*\\)}" snippet)
       (append `(,(substring snippet 0 (match-beginning 0))
   		,(list 'p (match-string 2 snippet) (match-string 1 snippet)))
