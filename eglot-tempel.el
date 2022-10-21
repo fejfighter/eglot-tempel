@@ -30,9 +30,10 @@
    ((match-string 4 snippet)
     (append `(,(substring snippet 0 (match-beginning 0)) p)
     (tempel-eglot--convert (substring snippet (match-end 0)))))
-   ((match-string 5 snippet) 'q)
-   (t 'q)))
-
+   ((match-string 5 snippet)
+    (list (substring snippet 0 (match-beginning 0)) 'q
+	    (substring snippet (match-end 0))))
+   (t (list snippet 'q))))
 
 (defun tempel-expand-yas-snippet (snippet &optional START END EXPAND-ENV)
   "Emulate yasnippet expansion function call.
