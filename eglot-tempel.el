@@ -21,11 +21,18 @@
 ;;; Code:
 (defun tempel-eglot--convert (snippet)
   "Take a SNIPPET provided by the LSP server and return a sexp useful for tempel.el."
-  (if (string-match "${\\([1-9]\\):\\([^}]*\\)}" snippet)
-      (append `(,(substring snippet 0 (match-beginning 0))
-  		,(list 'p (match-string 2 snippet) (match-string 1 snippet)))
-  	      (tempel-eglot--convert (substring snippet (match-end 0))))
-  `(,snippet q)))
+  (string-match "\\(\${\\([1-9]\\):\\([^}]*\\)}\\)\\|\\(\$[1-9]\\)\\|\\(\$0\\)" snippet)
+  (cond
+   ((match-string 1 snippet)
+    (append `(,(substring snippet 0 (match-beginning 0))
+  	      ,(list 'p (match-string 3 snippet) (match-string 2 snippet)))
+	    (tempel-eglot--convert (substring snippet (match-end 0)))))
+   ((match-string 4 snippet)
+    (append `(,(substring snippet 0 (match-beginning 0)) p)
+    (tempel-eglot--convert (substring snippet (match-end 0)))))
+   ((match-string 5 snippet) 'q)
+   (t 'q)))
+
 
 (defun tempel-expand-yas-snippet (snippet &optional START END EXPAND-ENV)
   "Emulate yasnippet expansion function call.
