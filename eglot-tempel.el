@@ -21,19 +21,21 @@
 ;;; Code:
 (defun tempel-eglot--convert (snippet)
   "Take a SNIPPET provided by the LSP server and return a sexp useful for tempel.el."
-  (string-match "\\(\${\\([1-9]\\):\\([^}]*\\)}\\)\\|\\(\$[1-9]\\)\\|\\(\$0\\)" snippet)
-  (cond
-   ((match-string 1 snippet)
-    (append `(,(substring snippet 0 (match-beginning 0))
-  	      ,(list 'p (match-string 3 snippet) (match-string 2 snippet)))
-	    (tempel-eglot--convert (substring snippet (match-end 0)))))
-   ((match-string 4 snippet)
+  (if (string-match "\\(\${\\([1-9]\\):\\([^}]*\\)}\\)\\|\\(\$[1-9]\\)\\|\\(\$0\\)" snippet 0)
+    (cond
+     ((match-string 1 snippet)
+      (append `(,(substring snippet 0 (match-beginning 0))
+  		,(list 'p (match-string 3 snippet) (match-string 2 snippet)))
+	      (tempel-eglot--convert (substring snippet (match-end 0)))))
+    ((match-string 4 snippet)
     (append `(,(substring snippet 0 (match-beginning 0)) p)
     (tempel-eglot--convert (substring snippet (match-end 0)))))
-   ((match-string 5 snippet)
-    (list (substring snippet 0 (match-beginning 0)) 'q
-	    (substring snippet (match-end 0))))
-   (t (list snippet 'q))))
+    ((match-string 5 snippet)
+     (append (list (substring snippet 0 (match-beginning 0)) 'q)
+	     (let ((rest (substring snippet (match-end 0))))
+	       (if (= (length rest) 0) ()
+		   (list rest))))))
+    (list snippet 'q)))
 
 (defun tempel-expand-yas-snippet (snippet &optional START END EXPAND-ENV)
   "Emulate yasnippet expansion function call.
