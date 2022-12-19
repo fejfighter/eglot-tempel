@@ -1,11 +1,12 @@
-;;; eglot-tempel.el --- use eglot as inline template expander
+;;; eglot-tempel.el --- Use eglot as inline template expander -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2022 Jeffrey Walsh
 
-;; Author: Jeff Walsh <fejfighter@gmail.com
-;; Version: 0.1
-;; Package-Requires: (eglot tempel)
-;; Keywords: LSP, eglot, template
+;; Author: Jeff Walsh <fejfighter@gmail.com>
+;; Created: 2022
+;; Version: 0.3
+;; Package-Requires: ((eglot "1.9")  (tempel "0.5") (emacs "24.1"))
+;; Keywords: convenience, languages, tools
 ;; URL: https://github.com/fejfighter/eglot-tempel
 
 ;;; Commentary:
@@ -19,7 +20,7 @@
 (require 'tempel)
 
 ;;; Code:
-(defun tempel-eglot--convert (snippet)
+(defun eglot-tempel--convert (snippet)
   "Take a SNIPPET provided by the LSP server and return a sexp useful for tempel.el."
   (if (string-match "\\(\${\\([1-9]\\):\\([^}]*\\)}\\)\\|\\(\$[1-9]\\)\\|\\(\$0\\)" snippet 0)
     (cond
@@ -41,7 +42,7 @@
   "Emulate yasnippet expansion function call.
 SNIPPET - snippet for converting.
 START END EXPAND-ENV are all ignored."
-       (tempel-insert (tempel-eglot--convert snippet)))
+       (tempel-insert (eglot-tempel--convert snippet)))
 
 (if (boundp 'yas-minor-mode)
     (defun eglot--snippet-expansion-fn () 'tempel-expand-yas-snippet)
