@@ -21,7 +21,7 @@
 
 ;;; Code:
 (defun eglot-tempel--convert (snippet)
-  "Take a SNIPPET provided by the LSP server and return a sexp useful for tempel.el."
+  "Convert a SNIPPET returned from Eglot into a format usefful for tempel"
   (if (string-match "\\(\${\\([1-9]\\):\\([^}]*\\)}\\)\\|\\(\$[1-9]\\)\\|\\(\$0\\)" snippet 0)
       (cond
        ((match-string 1 snippet)
@@ -42,7 +42,8 @@
   "Emulate yasnippet expansion function call.
 SNIPPET - snippet for converting.
 START END EXPAND-ENV are all ignored."
-       (tempel-insert (eglot-tempel--convert snippet)))
+    (ignore START END EXPAND-ENV)
+    (tempel-insert (eglot-tempel--convert snippet)))
 
 (if (boundp 'yas-minor-mode)
     (defun eglot--snippet-expansion-fn () 'tempel-expand-yas-snippet)
