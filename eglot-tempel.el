@@ -4,7 +4,7 @@
 
 ;; Author: Jeff Walsh <fejfighter@gmail.com>
 ;; Created: 2022
-;; Version: 0.3
+;; Version: 0.4
 ;; Package-Requires: ((eglot "1.9")  (tempel "0.5") (emacs "24.1"))
 ;; Keywords: convenience, languages, tools
 ;; URL: https://github.com/fejfighter/eglot-tempel
@@ -18,11 +18,12 @@
 ;; by translating the LSP template into a sexp used by tempel.el
 
 (require 'tempel)
+(require 'eglot)
 
 ;;; Code:
 (defun eglot-tempel--convert (snippet)
   "Convert a SNIPPET returned from Eglot into a format usefful for tempel"
-  (if (string-match "\\(\${\\([1-9]\\):\\([^}]*\\)}\\)\\|\\(\$[1-9]\\)\\|\\(\$0\\)" snippet 0)
+  (if (string-match "\\(\${\\([1-9]\\):\\([^}]*\\)}\\)\\|\\(\$[1-9]\\)\\|\\(\$0\\)\\|\\(\\.\\.\\.\\)" snippet 0)
       (cond
        ((match-string 1 snippet)
 	(append `(,(substring snippet 0 (match-beginning 0))
@@ -35,7 +36,11 @@
 	(append (list (substring snippet 0 (match-beginning 0)) 'q)
 		(let ((rest (substring snippet (match-end 0))))
 		  (if (= (length rest) 0) ()
-		    (list rest))))))
+		    (list rest)))))
+       ((match-string 6 snippet)
+	(append `(, (substring snippet 0 (match-beginning 0))
+		    ,(list 'p "..."))
+		    (eglot-tempel--convert (substring snippet (match-end 0))))))
     (list snippet 'q)))
 
 (defun tempel-expand-yas-snippet (snippet &optional START END EXPAND-ENV)
@@ -45,12 +50,19 @@ START END EXPAND-ENV are all ignored."
     (ignore START END EXPAND-ENV)
     (tempel-insert (eglot-tempel--convert snippet)))
 
+(defun eglot-tempel--init ()
 (if (boundp 'yas-minor-mode)
     (defun eglot--snippet-expansion-fn () 'tempel-expand-yas-snippet)
   (defvar yas-minor-mode t)
   (defun yas-expand-snippet (snippet &optional  START END EXPAND-ENV)
-    (tempel-expand-yas-snippet snippet START END EXPAND-ENV)))
+    (tempel-expand-yas-snippet snippet START END EXPAND-ENV))))
 
+
+(define-minor-mode eglot-tempel-mode
+  "Toggle eglot template support by tempel"
+  :init-value nil
+    (if eglot-tempel-mode
+      (progn eglot-tempel--init)))
 
 (provide 'eglot-tempel)
 ;;; eglot-tempel.el ends here

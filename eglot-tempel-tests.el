@@ -31,29 +31,35 @@
 
 (ert-deftest test-none ()
   ""
-  (should (equal (list "m_noArgs" 'q) (tempel-eglot--convert "m_noArgs"))))
+  (should (equal (list "m_noArgs" 'q) (eglot-tempel--convert "m_noArgs"))))
 
 (ert-deftest test-numbered ()
   ""
-  (should (equal (list "func(" 'p ")" 'q) (tempel-eglot--convert "func($1)")))
-  (should (equal (list "func(" 'p " " 'p ")" 'q) (tempel-eglot--convert "func($1 $2)")))
-  (should (equal (list "func(" 'p " " 'p " " 'p")" 'q) (tempel-eglot--convert "func($1 $2 $3)"))))
+  (should (equal (list "func(" 'p ")" 'q) (eglot-tempel--convert "func($1)")))
+  (should (equal (list "func(" 'p " " 'p ")" 'q) (eglot-tempel--convert "func($1 $2)")))
+  (should (equal (list "func(" 'p " " 'p " " 'p")" 'q) (eglot-tempel--convert "func($1 $2 $3)"))))
 
 (ert-deftest test-named ()
   ""
-  (should (equal (list "func(" (list 'p "named" "1") ")" 'q) (tempel-eglot--convert "func(${1:named})")))
+  (should (equal (list "func(" (list 'p "named" "1") ")" 'q) (eglot-tempel--convert "func(${1:named})")))
   (should (equal (list "func(" (list 'p "first" "1") " " (list 'p "second" "2" )")" 'q)
-		       (tempel-eglot--convert "func(${1:first} ${2:second})"))))
+		       (eglot-tempel--convert "func(${1:first} ${2:second})"))))
 
 (ert-deftest test-end ()
   ""
-  (should (equal (list "func(" 'p ")" 'q) (tempel-eglot--convert "func($1)$0")))
-  (should (equal (list "func(" 'p ")" 'q ";") (tempel-eglot--convert "func($1)$0;"))))
+  (should (equal (list "func(" 'p ")" 'q) (eglot-tempel--convert "func($1)$0")))
+  (should (equal (list "func(" 'p ")" 'q ";") (eglot-tempel--convert "func($1)$0;"))))
 
 (ert-deftest test-mixed ()
   ""
-  (should (equal (list "func(" (list 'p "named" "1") ")" 'q) (tempel-eglot--convert "func(${1:named})")))
+  (should (equal (list "func(" (list 'p "named" "1") ")" 'q) (eglot-tempel--convert "func(${1:named})")))
   (should (equal (list "func(" (list 'p "first" "1") " " 'p ")" 'q)
-		       (tempel-eglot--convert "func(${1:first} $2)$0"))))
+		       (eglot-tempel--convert "func(${1:first} $2)$0"))))
+
+(ert-deftest test-dots ()
+  ""
+  (should (equal (list "func(" (list 'p "named" "1") " ...)" 'q) (eglot-tempel--convert "func(${1:named} ...)")))
+  (should (equal (list "func(" (list 'p "first" "1") " " 'p " ...)" 'q)
+		       (eglot-tempel--convert "func(${1:first} $2 ...)$0"))))
 
 ;;; eglot-tempel-tests.el ends here
