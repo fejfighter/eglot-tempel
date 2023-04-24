@@ -62,7 +62,7 @@ START END EXPAND-ENV are all ignored."
   "Toggle eglot template support by tempel"
   :init-value nil
     (if eglot-tempel-mode
-      (progn eglot-tempel--init)))
+      (eglot-tempel--init)))
 
 (provide 'eglot-tempel)
 ;;; eglot-tempel.el ends here
