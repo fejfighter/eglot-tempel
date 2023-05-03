@@ -50,19 +50,19 @@ START END EXPAND-ENV are all ignored."
     (ignore START END EXPAND-ENV)
     (tempel-insert (eglot-tempel--convert snippet)))
 
-(defun eglot-tempel--init ()
-(if (boundp 'yas-minor-mode)
-    (defun eglot--snippet-expansion-fn () 'tempel-expand-yas-snippet)
-  (defvar yas-minor-mode t)
-  (defun yas-expand-snippet (snippet &optional  START END EXPAND-ENV)
-    (tempel-expand-yas-snippet snippet START END EXPAND-ENV))))
+(defun eglot-tempel--snippet-expansion-fn ()
+  "An override of ‘eglot--snippet-expansion-fn’."
+  #'tempel-expand-yas-snippet)
 
-
+;;;###autoload
 (define-minor-mode eglot-tempel-mode
   "Toggle eglot template support by tempel"
-  :init-value nil
+  :global t
     (if eglot-tempel-mode
-      (eglot-tempel--init)))
+        (advice-add #'eglot--snippet-expansion-fn
+                    :override #'eglot-tempel--snippet-expansion-fn)
+      (advice-remove #'eglot--snippet-expansion-fn
+                     #'eglot-tempel--snippet-expansion-fn)))
 
 (provide 'eglot-tempel)
 ;;; eglot-tempel.el ends here
