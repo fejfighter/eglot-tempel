@@ -5,7 +5,7 @@
 ;; Author: Jeff Walsh <fejfighter@gmail.com>
 ;; Created: 2022
 ;; Version: 0.4
-;; Package-Requires: ((eglot "1.9")  (tempel "0.5") (emacs "24.1"))
+;; Package-Requires: ((eglot "1.9")  (tempel "0.5") (emacs "24.4"))
 ;; Keywords: convenience, languages, tools
 ;; URL: https://github.com/fejfighter/eglot-tempel
 
@@ -43,7 +43,7 @@
 		    (eglot-tempel--convert (substring snippet (match-end 0))))))
     (list snippet 'q)))
 
-(defun tempel-expand-yas-snippet (snippet &optional START END EXPAND-ENV)
+(defun eglot-tempel-expand-yas-snippet (snippet &optional START END EXPAND-ENV)
   "Emulate yasnippet expansion function call.
 SNIPPET - snippet for converting.
 START END EXPAND-ENV are all ignored."
@@ -52,7 +52,7 @@ START END EXPAND-ENV are all ignored."
 
 (defun eglot-tempel--snippet-expansion-fn ()
   "An override of ‘eglot--snippet-expansion-fn’."
-  #'tempel-expand-yas-snippet)
+  #'eglot-tempel-expand-yas-snippet)
 
 ;;;###autoload
 (define-minor-mode eglot-tempel-mode
