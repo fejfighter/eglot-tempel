@@ -4,7 +4,7 @@
 
 ;; Author: Jeff Walsh <fejfighter@gmail.com>
 ;; Created: 2022
-;; Version: 0.4
+;; Version: 0.5
 ;; Package-Requires: ((eglot "1.9")  (tempel "0.5") (emacs "24.4"))
 ;; Keywords: convenience, languages, tools
 ;; URL: https://github.com/fejfighter/eglot-tempel
