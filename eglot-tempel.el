@@ -1,6 +1,6 @@
 ;;; eglot-tempel.el --- Use eglot as inline template expander -*- lexical-binding: t -*-
 
-;; Copyright (C) 2022 Jeffrey Walsh
+;; Copyright (C) 2022-2023 Jeffrey Walsh
 
 ;; Author: Jeff Walsh <fejfighter@gmail.com>
 ;; Created: 2022
@@ -57,6 +57,7 @@ START END EXPAND-ENV are all ignored."
 ;;;###autoload
 (define-minor-mode eglot-tempel-mode
   "Toggle eglot template support by tempel."
+  :group eglot
   :global t
     (if eglot-tempel-mode
         (advice-add #'eglot--snippet-expansion-fn
