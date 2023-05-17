@@ -1,11 +1,11 @@
 ;;; eglot-tempel.el --- Use eglot as inline template expander -*- lexical-binding: t -*-
 
-;; Copyright (C) 2022 Jeffrey Walsh
+;; Copyright (C) 2022-2023 Jeffrey Walsh
 
 ;; Author: Jeff Walsh <fejfighter@gmail.com>
 ;; Created: 2022
-;; Version: 0.4
-;; Package-Requires: ((eglot "1.9")  (tempel "0.5") (emacs "24.1"))
+;; Version: 0.5
+;; Package-Requires: ((eglot "1.9")  (tempel "0.5") (emacs "24.4"))
 ;; Keywords: convenience, languages, tools
 ;; URL: https://github.com/fejfighter/eglot-tempel
 
@@ -22,7 +22,7 @@
 
 ;;; Code:
 (defun eglot-tempel--convert (snippet)
-  "Convert a SNIPPET returned from Eglot into a format usefful for tempel"
+  "Convert a SNIPPET returned from Eglot into a format usefful for tempel."
   (if (string-match "\\(\${\\([1-9]\\):\\([^}]*\\)}\\)\\|\\(\$[1-9]\\)\\|\\(\$0\\)\\|\\(\\.\\.\\.\\)" snippet 0)
       (cond
        ((match-string 1 snippet)
@@ -43,7 +43,7 @@
 		    (eglot-tempel--convert (substring snippet (match-end 0))))))
     (list snippet 'q)))
 
-(defun tempel-expand-yas-snippet (snippet &optional START END EXPAND-ENV)
+(defun eglot-tempel-expand-yas-snippet (snippet &optional START END EXPAND-ENV)
   "Emulate yasnippet expansion function call.
 SNIPPET - snippet for converting.
 START END EXPAND-ENV are all ignored."
@@ -52,11 +52,12 @@ START END EXPAND-ENV are all ignored."
 
 (defun eglot-tempel--snippet-expansion-fn ()
   "An override of ‘eglot--snippet-expansion-fn’."
-  #'tempel-expand-yas-snippet)
+  #'eglot-tempel-expand-yas-snippet)
 
 ;;;###autoload
 (define-minor-mode eglot-tempel-mode
-  "Toggle eglot template support by tempel"
+  "Toggle eglot template support by tempel."
+  :group eglot
   :global t
     (if eglot-tempel-mode
         (advice-add #'eglot--snippet-expansion-fn
