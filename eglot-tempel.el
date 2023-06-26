@@ -38,7 +38,7 @@
 ;;; Code:
 (defun eglot-tempel--convert (snippet)
   "Convert a SNIPPET returned from Eglot into a format usefful for tempel."
-  (if (string-match "\\(\${\\([1-9]\\):\\([^}]*\\)}\\)\\|\\(\$[1-9]\\)\\|\\(\$0\\)\\|\\(\\.\\.\\.\\)" snippet 0)
+  (if (string-match "\\(${\\([1-9]\\):\\([^}]*\\)}\\)\\|\\($[1-9]\\)\\|\\($0\\)\\|\\(\\.\\.\\.\\)" snippet 0)
       (cond
        ((match-string 1 snippet)
 	(append `(,(substring snippet 0 (match-beginning 0))
@@ -72,7 +72,7 @@ START END EXPAND-ENV are all ignored."
 ;;;###autoload
 (define-minor-mode eglot-tempel-mode
   "Toggle eglot template support by tempel."
-  :group eglot
+  :group 'eglot
   :global t
     (if eglot-tempel-mode
         (advice-add #'eglot--snippet-expansion-fn
