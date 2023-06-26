@@ -38,24 +38,24 @@
 ;;; Code:
 (defun eglot-tempel--convert (snippet)
   "Convert a SNIPPET returned from Eglot into a format usefful for tempel."
-  (if (string-match "\\(\${\\([1-9]\\):\\([^}]*\\)}\\)\\|\\(\$[1-9]\\)\\|\\(\$0\\)\\|\\(\\.\\.\\.\\)" snippet 0)
+  (if (string-match "\\(${\\([1-9]\\):\\([^}]*\\)}\\)\\|\\($[1-9]\\)\\|\\($0\\)\\|\\(\\.\\.\\.\\)" snippet 0)
       (cond
        ((match-string 1 snippet)
-	(append `(,(substring snippet 0 (match-beginning 0))
-  		  ,(list 'p (match-string 3 snippet) (match-string 2 snippet)))
-		(eglot-tempel--convert (substring snippet (match-end 0)))))
+        (append `(,(substring snippet 0 (match-beginning 0))
+                  ,(list 'p (match-string 3 snippet) (match-string 2 snippet)))
+                (eglot-tempel--convert (substring snippet (match-end 0)))))
        ((match-string 4 snippet)
-	(append `(,(substring snippet 0 (match-beginning 0)) p)
-		(eglot-tempel--convert (substring snippet (match-end 0)))))
+        (append `(,(substring snippet 0 (match-beginning 0)) p)
+                (eglot-tempel--convert (substring snippet (match-end 0)))))
        ((match-string 5 snippet)
-	(append (list (substring snippet 0 (match-beginning 0)) 'q)
-		(let ((rest (substring snippet (match-end 0))))
-		  (if (= (length rest) 0) ()
-		    (list rest)))))
+        (append (list (substring snippet 0 (match-beginning 0)) 'q)
+                (let ((rest (substring snippet (match-end 0))))
+                  (if (= (length rest) 0) ()
+                    (list rest)))))
        ((match-string 6 snippet)
-	(append `(, (substring snippet 0 (match-beginning 0))
-		    ,(list 'p "..."))
-		    (eglot-tempel--convert (substring snippet (match-end 0))))))
+        (append `(, (substring snippet 0 (match-beginning 0))
+                    ,(list 'p "..."))
+                    (eglot-tempel--convert (substring snippet (match-end 0))))))
     (list snippet 'q)))
 
 (defun eglot-tempel-expand-yas-snippet (snippet &optional START END EXPAND-ENV)
@@ -72,7 +72,7 @@ START END EXPAND-ENV are all ignored."
 ;;;###autoload
 (define-minor-mode eglot-tempel-mode
   "Toggle eglot template support by tempel."
-  :group eglot
+  :group 'eglot
   :global t
     (if eglot-tempel-mode
         (advice-add #'eglot--snippet-expansion-fn
