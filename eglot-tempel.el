@@ -1,11 +1,11 @@
-;;; eglot-tempel.el --- Use eglot as inline template expander -*- lexical-binding: t -*-
+;;; eglot-tempel.el --- Use tempel to expand snippets from eglot -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2022-2023 Jeffrey Walsh
 
 ;; Author: Jeff Walsh <fejfighter@gmail.com>
 ;; Created: 2022
-;; Version: 0.5
-;; Package-Requires: ((eglot "1.9")  (tempel "0.5") (emacs "24.4"))
+;; Version: 0.7
+;; Package-Requires: ((eglot "1.9")  (tempel "0.5") (emacs "24.4") (peg "1.0.1"))
 ;; Keywords: convenience, languages, tools
 ;; URL: https://github.com/fejfighter/eglot-tempel
 
@@ -34,29 +34,33 @@
 
 (require 'tempel)
 (require 'eglot)
+(require 'peg)
 
 ;;; Code:
+(defun eglot-tempel--peg (snippet)
+  "Parse lsp-server provided SNIPPET and produce a Lisp form that tempel can use."
+  (with-temp-buffer
+    (insert snippet)
+    (goto-char (point-min))
+    (with-peg-rules
+     ((anything (* (or tabstop
+			 braced
+			 placeholder
+			 choice
+			 dots
+			 text)))
+      (tabstop (and "$" int ) `(num -- (if (= 0 num) 'q 'p)))
+      (braced (and "${" int "}") `(num --  (if (= 0 num) 'q 'p)))
+      (placeholder (and "${" int ":" anything "}") `(num place -- `(p ,place ,num)))
+      (choice  (and "${" int "|" text "|}" `(num choices -- `(p ,choices ,num))))
+      (dots (substring "...") `( -- `(p "...")))
+      (int (substring (+ [0-9])) `(num -- (string-to-number num)))
+      (text (substring (+ (not (or "$" "}" "|" (eol))) (any)))))
+     `( ,@(reverse (peg-run (peg anything))) q))))
+
 (defun eglot-tempel--convert (snippet)
-  "Convert a SNIPPET returned from Eglot into a format usefful for tempel."
-  (if (string-match "\\(${\\([1-9]\\):\\([^}]*\\)}\\)\\|\\($[1-9]\\)\\|\\($0\\)\\|\\(\\.\\.\\.\\)" snippet 0)
-      (cond
-       ((match-string 1 snippet)
-        (append `(,(substring snippet 0 (match-beginning 0))
-                  ,(list 'p (match-string 3 snippet) (match-string 2 snippet)))
-                (eglot-tempel--convert (substring snippet (match-end 0)))))
-       ((match-string 4 snippet)
-        (append `(,(substring snippet 0 (match-beginning 0)) p)
-                (eglot-tempel--convert (substring snippet (match-end 0)))))
-       ((match-string 5 snippet)
-        (append (list (substring snippet 0 (match-beginning 0)) 'q)
-                (let ((rest (substring snippet (match-end 0))))
-                  (if (= (length rest) 0) ()
-                    (list rest)))))
-       ((match-string 6 snippet)
-        (append `(, (substring snippet 0 (match-beginning 0))
-                    ,(list 'p "..."))
-                    (eglot-tempel--convert (substring snippet (match-end 0))))))
-    (list snippet 'q)))
+  "Convert a SNIPPET returned from Eglot into a format useful for tempel."
+    (eglot-tempel--peg snippet))
 
 (defun eglot-tempel-expand-yas-snippet (snippet &optional START END EXPAND-ENV)
   "Emulate yasnippet expansion function call.
@@ -65,6 +69,7 @@ START END EXPAND-ENV are all ignored."
     (ignore START END EXPAND-ENV)
     (tempel-insert (eglot-tempel--convert snippet)))
 
+
 (defun eglot-tempel--snippet-expansion-fn ()
   "An override of ‘eglot--snippet-expansion-fn’."
   #'eglot-tempel-expand-yas-snippet)
@@ -72,13 +77,12 @@ START END EXPAND-ENV are all ignored."
 ;;;###autoload
 (define-minor-mode eglot-tempel-mode
   "Toggle eglot template support by tempel."
-  :group 'eglot
   :global t
-    (if eglot-tempel-mode
-        (advice-add #'eglot--snippet-expansion-fn
-                    :override #'eglot-tempel--snippet-expansion-fn)
-      (advice-remove #'eglot--snippet-expansion-fn
-                     #'eglot-tempel--snippet-expansion-fn)))
+  (if eglot-tempel-mode
+       (advice-add 'eglot--snippet-expansion-fn
+                   :override #'eglot-tempel--snippet-expansion-fn)
+    (advice-remove 'eglot--snippet-expansion-fn
+                    #'eglot-tempel--snippet-expansion-fn)))
 
 (provide 'eglot-tempel)
 ;;; eglot-tempel.el ends here
