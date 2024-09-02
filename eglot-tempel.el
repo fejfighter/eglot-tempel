@@ -69,7 +69,6 @@ START END EXPAND-ENV are all ignored."
     (ignore START END EXPAND-ENV)
     (tempel-insert (eglot-tempel--convert snippet)))
 
-
 (defun eglot-tempel--snippet-expansion-fn ()
   "An override of ‘eglot--snippet-expansion-fn’."
   #'eglot-tempel-expand-yas-snippet)
@@ -77,12 +76,16 @@ START END EXPAND-ENV are all ignored."
 ;;;###autoload
 (define-minor-mode eglot-tempel-mode
   "Toggle eglot template support by tempel."
-  :global t
-  (if eglot-tempel-mode
-       (advice-add 'eglot--snippet-expansion-fn
-                   :override #'eglot-tempel--snippet-expansion-fn)
-    (advice-remove 'eglot--snippet-expansion-fn
-                    #'eglot-tempel--snippet-expansion-fn)))
+  :init-value nil
+  :global nil
+  :lighter nil
+  (unless (advice-member-p 'eglot--snippet-expansion-fn
+                    #'eglot-tempel--snippet-expansion-fn)
+    (if eglot-tempel-mode
+	(advice-add 'eglot--snippet-expansion-fn
+                    :override #'eglot-tempel--snippet-expansion-fn)
+      (advice-remove 'eglot--snippet-expansion-fn
+                     #'eglot-tempel--snippet-expansion-fn))))
 
 (provide 'eglot-tempel)
 ;;; eglot-tempel.el ends here
