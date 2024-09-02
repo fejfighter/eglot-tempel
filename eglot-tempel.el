@@ -4,7 +4,7 @@
 
 ;; Author: Jeff Walsh <fejfighter@gmail.com>
 ;; Created: 2022
-;; Version: 0.7.1
+;; Version: 0.8
 ;; Package-Requires: ((eglot "1.9")  (tempel "0.5") (emacs "29.1") (peg "1.0.1"))
 ;; Keywords: convenience, languages, tools
 ;; URL: https://github.com/fejfighter/eglot-tempel
@@ -66,9 +66,11 @@
   "Emulate yasnippet expansion function call.
 SNIPPET - snippet for converting.
 START END EXPAND-ENV are all ignored."
-    (ignore START END EXPAND-ENV)
-    (tempel-insert (eglot-tempel--convert snippet)))
+  (ignore START END EXPAND-ENV)
+  (when eglot-tempel-mode
+    (tempel-insert (eglot-tempel--convert snippet))))
 
+;;;###autoload
 (defun eglot-tempel--snippet-expansion-fn ()
   "An override of ‘eglot--snippet-expansion-fn’."
   #'eglot-tempel-expand-yas-snippet)
@@ -77,15 +79,18 @@ START END EXPAND-ENV are all ignored."
 (define-minor-mode eglot-tempel-mode
   "Toggle eglot template support by tempel."
   :init-value nil
-  :global nil
+  :global t
   :lighter nil
-  (unless (advice-member-p 'eglot--snippet-expansion-fn
-                    #'eglot-tempel--snippet-expansion-fn)
-    (if eglot-tempel-mode
+  (progn
+  (if eglot-tempel-mode
+      (unless (advice-member-p 'eglot--snippet-expansion-fn
+			       #'eglot-tempel--snippet-expansion-fn)
 	(advice-add 'eglot--snippet-expansion-fn
-                    :override #'eglot-tempel--snippet-expansion-fn)
-      (advice-remove 'eglot--snippet-expansion-fn
-                     #'eglot-tempel--snippet-expansion-fn))))
+		    :override #'eglot-tempel--snippet-expansion-fn))
+    (advice-remove 'eglot--snippet-expansion-fn
+		   #'eglot-tempel--snippet-expansion-fn))
+  (when (eglot-current-server)
+    (eglot-reconnect (eglot-current-server)))))
 
 (provide 'eglot-tempel)
 ;;; eglot-tempel.el ends here
