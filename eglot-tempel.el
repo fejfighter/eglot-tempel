@@ -43,24 +43,31 @@
     (insert snippet)
     (goto-char (point-min))
     (with-peg-rules
-     ((anything (* (or tabstop
-			 braced
-			 placeholder
-			 choice
-			 dots
-			 text)))
-      (tabstop (and "$" int ) `(num -- (if (= 0 num) 'q 'p)))
-      (braced (and "${" int "}") `(num --  (if (= 0 num) 'q 'p)))
-      (placeholder (and "${" int ":" anything "}") `(num place -- `(p ,place ,num)))
-      (choice  (and "${" int "|" text "|}" `(num choices -- `(p ,choices ,num))))
-      (dots (substring "...") `( -- `(p "...")))
-      (int (substring (+ [0-9])) `(num -- (string-to-number num)))
-      (text (substring (+ (not (or "$" "}" "|" (eol))) (any)))))
-     `( ,@(reverse (peg-run (peg anything))) q))))
+	((snippet (* (or anything text)))
+	 (anything (or tabstop
+		       braced
+		       placeholder
+		       choice
+		       dots))
+	 (tabstop (and "$" int )  `(num -- (if (= 0 num) 'q 'p)))
+	 (braced (and "${" int "}") `(num --  (if (= 0 num) 'q 'p)))
+	 (placeholder (and "${" int ":" (or anything name) "}")
+		      `(num place -- (let ((placeholder (if (string-empty-p place)
+							    "_"
+							  place)))
+				       `(p ,placeholder ,num))))
+	 (choice  (and "${" int "|" text "|}" `(num choices -- `(p ,choices ,num))))
+	 (dots "..." `( -- `(p "...")))
+	 (int (substring (+ [0-9])) `(num -- (string-to-number num)))
+	 (text (substring (+ char)))
+	 (name (substring (* char)))
+	 (char (not end) (any))
+	 (end  (or (set "$}|") (eob))))
+      (peg-run (peg snippet)))))
 
 (defun eglot-tempel--convert (snippet)
   "Convert a SNIPPET returned from Eglot into a format useful for tempel."
-    (eglot-tempel--peg snippet))
+  `( ,@(reverse (eglot-tempel--peg snippet)) q))
 
 (defun eglot-tempel-expand-yas-snippet (snippet &optional START END EXPAND-ENV)
   "Emulate yasnippet expansion function call.

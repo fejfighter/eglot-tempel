@@ -43,9 +43,12 @@
 
 (ert-deftest test-named ()
   ""
-  (should (equal (list "func(" (list 'p "named" "1") ")" 'q) (eglot-tempel--convert "func(${1:named})")))
-  (should (equal (list "func(" (list 'p "first" "1") " " (list 'p "second" "2" )")" 'q)
-		       (eglot-tempel--convert "func(${1:first} ${2:second})"))))
+  (should (equal (list "func(" (list 'p "named" 1) ")" 'q) (eglot-tempel--convert "func(${1:named})")))
+  (should (equal (list "func(" (list 'p "first" 1) " " (list 'p "second" 2 )")" 'q)
+		 (eglot-tempel--convert "func(${1:first} ${2:second})")))
+  (should (equal (list "func(" (list 'p "_" 1) " " (list 'p "second" 2) ")" 'q)
+		       (eglot-tempel--convert "func(${1:} ${2:second})"))))
+
 
 (ert-deftest test-end ()
   ""
