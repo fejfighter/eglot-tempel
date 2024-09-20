@@ -43,16 +43,15 @@
     (insert snippet)
     (goto-char (point-min))
     (with-peg-rules
-	((snippet (* anything))
+	((snippet (* (or anything text)))
 	 (anything (or tabstop
 		       braced
 		       placeholder
 		       choice
-		       dots
-		       text))
+		       dots))
 	 (tabstop (and "$" int )  `(num -- (if (= 0 num) 'q 'p)))
 	 (braced (and "${" int "}") `(num --  (if (= 0 num) 'q 'p)))
-	 (placeholder (and "${" int ":" anything "}")
+	 (placeholder (and "${" int ":" (or anything name) "}")
 		      `(num place -- (let ((placeholder (if (string-empty-p place)
 							    "_"
 							  place)))
@@ -60,7 +59,9 @@
 	 (choice  (and "${" int "|" text "|}" `(num choices -- `(p ,choices ,num))))
 	 (dots "..." `( -- `(p "...")))
 	 (int (substring (+ [0-9])) `(num -- (string-to-number num)))
-	 (text (substring (* (not end) (any))))
+	 (text (substring (+ char)))
+	 (name (substring (* char (any))))
+	 (char (not end) (any))
 	 (end  (or (set "$}|") (eob))))
       (peg-run (peg snippet)))))
 
