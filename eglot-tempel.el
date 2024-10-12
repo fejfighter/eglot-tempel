@@ -43,26 +43,25 @@
     (insert snippet)
     (goto-char (point-min))
     (with-peg-rules
-	((snippet (* (or anything text)))
-	 (anything (or tabstop
-		       braced
-		       placeholder
-		       choice
-		       dots))
-	 (tabstop (and "$" int )  `(num -- (if (= 0 num) 'q 'p)))
-	 (braced (and "${" int "}") `(num --  (if (= 0 num) 'q 'p)))
-	 (placeholder (and "${" int ":" (or anything name) "}")
-		      `(num place -- (let ((placeholder (if (string-empty-p place)
-							    "_"
-							  place)))
-				       `(p ,placeholder ,num))))
-	 (choice  (and "${" int "|" text "|}" `(num choices -- `(p ,choices ,num))))
-	 (dots "..." `( -- `(p "...")))
-	 (int (substring (+ [0-9])) `(num -- (string-to-number num)))
-	 (text (substring (+ char)))
-	 (name (substring (* char)))
-	 (char (not end) (any))
-	 (end  (or (set "$}|") (eob))))
+        ((snippet (* (or anything text)))
+         (anything (or tabstop
+                       braced
+                       placeholder
+                       choice
+                       dots))
+         (tabstop (and "$" int )  `(num -- (if (= 0 num) 'q 'p)))
+         (braced (and "${" int "}") `(num --  (if (= 0 num) 'q 'p)))
+         (placeholder (and "${" int ":" (or anything name) "}")
+                      `(num place -- (let ((placeholder (if (string-empty-p place)
+                                                            "_"
+                                                          place)))
+                                       `(p ,placeholder ,num))))
+         (choice  (and "${" int "|" choices "|}" `(num choices -- `(p ,choices ,num))))
+         (dots "..." `( -- `(p "...")))
+         (int (substring (+ [0-9])) `(num -- (string-to-number num)))
+         (text (substring (+ (not (or "$" (eob))) (any))))
+         (name (substring (* (not (or (set "$}") (eob))) (any))))
+         (choices (substring (* (not (or (set "$|") (eob))) (any)))))
       (peg-run (peg snippet)))))
 
 (defun eglot-tempel--convert (snippet)
@@ -91,11 +90,11 @@ START END EXPAND-ENV are all ignored."
   (progn
   (if eglot-tempel-mode
       (unless (advice-member-p 'eglot--snippet-expansion-fn
-			       #'eglot-tempel--snippet-expansion-fn)
-	(advice-add 'eglot--snippet-expansion-fn
-		    :override #'eglot-tempel--snippet-expansion-fn))
+                               #'eglot-tempel--snippet-expansion-fn)
+        (advice-add 'eglot--snippet-expansion-fn
+                    :override #'eglot-tempel--snippet-expansion-fn))
     (advice-remove 'eglot--snippet-expansion-fn
-		   #'eglot-tempel--snippet-expansion-fn))
+                   #'eglot-tempel--snippet-expansion-fn))
   (when (eglot-current-server)
     (eglot-reconnect (eglot-current-server)))))
 

@@ -49,6 +49,13 @@
   (should (equal (list "func(" (list 'p "_" 1) " " (list 'p "second" 2) ")" 'q)
 		       (eglot-tempel--convert "func(${1:} ${2:second})"))))
 
+(ert-deftest test-syntax-in-text ()
+  ""
+  (should (equal (list "for " (list 'p "_" 1) ", " (list 'p "_" 2) " := range rows {
+	" 'q "
+}" 'q) (eglot-tempel--convert "for ${1:}, ${2:} := range rows {\012\011$0\012}")))
+  (should (equal (list "#define  TESTBIT 0x" (list 'p "basebit" 1) " | 1 << " (list 'p "offset" 2) 'q)
+		 (eglot-tempel--convert "#define  TESTBIT 0x${1:basebit} | 1 << ${2:offset}"))))
 
 (ert-deftest test-end ()
   ""
