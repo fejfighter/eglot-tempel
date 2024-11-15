@@ -47,8 +47,7 @@
          (anything (or tabstop
                        braced
                        placeholder
-                       choice
-                       dots))
+                       choice))
          (tabstop (and "$" int )  `(num -- (if (= 0 num) 'q 'p)))
          (braced (and "${" int "}") `(num --  (if (= 0 num) 'q 'p)))
          (placeholder (and "${" int ":" (or anything name) "}")
@@ -57,7 +56,6 @@
                                                           place)))
                                        `(p ,placeholder ,num))))
          (choice  (and "${" int "|" choices "|}" `(num choices -- `(p ,choices ,num))))
-         (dots "..." `( -- `(p "...")))
          (int (substring (+ [0-9])) `(num -- (string-to-number num)))
          (text (substring (+ (not (or "$" (eob))) (any))))
          (name (substring (* (not (or (set "$}") (eob))) (any))))

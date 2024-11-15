@@ -72,7 +72,9 @@
   ""
   (should (equal (list "func(" (list 'p "named" 1) " ...)" 'q) (eglot-tempel--convert "func(${1:named} ...)")))
   (should (equal (list "func(" (list 'p "first" 1) " " 'p " ...)" 'q 'q)
-		       (eglot-tempel--convert "func(${1:first} $2 ...)$0"))))
+		       (eglot-tempel--convert "func(${1:first} $2 ...)$0")))
+  (should (equal (list "func(" (list 'p "..." 1) " " 'p " ...)" 'q 'q)
+		       (eglot-tempel--convert "func(${1:...} $2 ...)$0"))))
 
 (ert-deftest test-choice ()
   ""
